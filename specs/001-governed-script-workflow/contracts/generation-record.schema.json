@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://commercialscripting/specs/contracts/generation-record.schema.json",
+  "title": "GenerationRecord",
+  "type": "object",
+  "required": [
+    "generationId",
+    "sessionId",
+    "userId",
+    "status",
+    "groundingMode",
+    "modelDeployment",
+    "usedRestFallback",
+    "createdAtUtc",
+    "requestCorrelationId"
+  ],
+  "properties": {
+    "generationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "userId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "userDisplayName": {
+      "type": "string"
+    },
+    "promptText": {
+      "type": "string",
+      "minLength": 1
+    },
+    "responseText": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["received", "grounded", "completed", "failed"]
+    },
+    "groundingMode": {
+      "type": "string",
+      "enum": ["news", "none", "fallback"]
+    },
+    "modelDeployment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "usedRestFallback": {
+      "type": "boolean"
+    },
+    "failureReason": {
+      "type": "string"
+    },
+    "createdAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requestCorrelationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sourceTitle", "canonicalUrl", "publishedAtUtc", "freshnessEligible"],
+        "properties": {
+          "sourceTitle": {
+            "type": "string"
+          },
+          "canonicalUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "publishedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "freshnessEligible": {
+            "type": "boolean"
+          },
+          "excerptText": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "required": ["responseText", "completedAtUtc"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "failed"
+          }
+        }
+      },
+      "then": {
+        "required": ["failureReason"]
+      }
+    }
+  ]
+}

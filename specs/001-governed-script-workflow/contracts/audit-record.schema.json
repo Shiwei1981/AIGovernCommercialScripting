@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://commercialscripting/specs/contracts/audit-record.schema.json",
+  "title": "AuditRecord",
+  "type": "object",
+  "required": [
+    "auditEventId",
+    "sessionId",
+    "userId",
+    "actionType",
+    "actionStatus",
+    "occurredAtUtc",
+    "requestCorrelationId",
+    "clientAppId"
+  ],
+  "properties": {
+    "auditEventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "generationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "userId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actionType": {
+      "type": "string",
+      "enum": [
+        "sign_in",
+        "generation_requested",
+        "generation_completed",
+        "generation_failed",
+        "history_searched",
+        "audit_viewed"
+      ]
+    },
+    "actionStatus": {
+      "type": "string",
+      "enum": ["success", "failure"]
+    },
+    "occurredAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requestCorrelationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clientAppId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clientIpHash": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "actionType": {
+            "enum": [
+              "generation_requested",
+              "generation_completed",
+              "generation_failed",
+              "audit_viewed"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": ["generationId"]
+      }
+    }
+  ]
+}

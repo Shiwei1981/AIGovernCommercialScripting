@@ -1,0 +1,12 @@
+node_modules/
+backend/
+infra/
+sql/
+specs/
+docs/
+.github/
+.vscode/
+.venv/
+.venv-impl/
+*.log
+.env*

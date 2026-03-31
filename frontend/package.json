@@ -1,0 +1,13 @@
+{
+  "name": "aigoven-demo-commercial-scripting-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "echo 'No frontend linter configured yet'",
+    "test:e2e": "echo 'E2E tests run via Python Playwright suite'"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^4.10.0"
+  }
+}

@@ -100,6 +100,24 @@
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
 
+## Constitution Alignment *(mandatory)*
+
+<!--
+  ACTION REQUIRED: Confirm how this feature satisfies the local constitution.
+  Replace every placeholder with project-specific decisions or explicit blockers.
+-->
+
+- **Authentication Boundary**: [Describe the Entra-only sign-in path, owning app
+  registration, and any required redirect or consent details]
+- **Runtime Boundary**: [Confirm the HTML5 frontend plus stateless Python HTTPS backend and
+  list the secure runtime configuration sources]
+- **Contracts and Data Boundary**: [Explain how generation identity, audit records, and any
+  SQL objects preserve shared contracts without changing existing tables]
+- **Retrieval Boundary**: [Describe the allowlisted news corpus, source URL handling,
+  six-month freshness enforcement, and Azure OpenAI orchestration choice]
+- **Deployment and Evidence Boundary**: [List ARM JSON deployment artifacts, manual VM or
+  certificate steps, and the evidence required for audit traceability]
+
 ## Success Criteria *(mandatory)*
 
 <!--

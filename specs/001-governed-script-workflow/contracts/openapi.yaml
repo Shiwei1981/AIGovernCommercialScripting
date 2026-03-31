@@ -1,0 +1,235 @@
+openapi: 3.1.0
+info:
+  title: CommercialScripting Governed Workflow API
+  version: 0.1.0
+  description: >-
+    Protected backend API for governed script generation, history retrieval, and
+    audit traceability.
+servers:
+  - url: https://commercialscriptingvm
+security:
+  - entraAuth: []
+paths:
+  /api/generations:
+    post:
+      summary: Submit a governed generation request.
+      operationId: createGeneration
+      tags: [Generations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerationCreateRequest'
+      responses:
+        '201':
+          description: Generation accepted and persisted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerationCreateResponse'
+        '400':
+          description: Invalid request payload.
+        '401':
+          description: Entra token missing or invalid.
+        '503':
+          description: Controlled failure because retrieval or generation dependencies are unavailable.
+    get:
+      summary: Search generation history.
+      operationId: searchGenerationHistory
+      tags: [Generations]
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+        - in: query
+          name: sessionId
+          schema:
+            type: string
+        - in: query
+          name: generationId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Matching generation history.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GenerationHistoryItem'
+        '400':
+          description: No supported search key was supplied.
+        '401':
+          description: Entra token missing or invalid.
+  /api/generations/{generationId}:
+    get:
+      summary: Retrieve one generation record.
+      operationId: getGeneration
+      tags: [Generations]
+      parameters:
+        - in: path
+          name: generationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Stored generation details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerationRecord'
+        '401':
+          description: Entra token missing or invalid.
+        '404':
+          description: Generation not found.
+  /api/generations/{generationId}/audit:
+    get:
+      summary: Retrieve the audit trace for one generation.
+      operationId: getGenerationAuditTrace
+      tags: [Audit]
+      parameters:
+        - in: path
+          name: generationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Audit events and source references for the requested generation.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [generationId, auditEvents, sourceReferences]
+                properties:
+                  generationId:
+                    type: string
+                    format: uuid
+                  auditEvents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditRecord'
+                  sourceReferences:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SourceReference'
+        '401':
+          description: Entra token missing or invalid.
+        '404':
+          description: Generation not found.
+components:
+  securitySchemes:
+    entraAuth:
+      type: oauth2
+      description: Microsoft Entra authorization code flow with PKCE for the CommercialScripting SPA.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token
+          scopes:
+            api://commercialscripting/access_as_user: Access the CommercialScripting backend API.
+  schemas:
+    GenerationCreateRequest:
+      type: object
+      required: [sessionId, prompt]
+      properties:
+        sessionId:
+          type: string
+        prompt:
+          type: string
+          minLength: 1
+        useRecentNews:
+          type: boolean
+          default: true
+    GenerationCreateResponse:
+      type: object
+      required: [generationId, status, createdAtUtc]
+      properties:
+        generationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [received, grounded, completed, failed]
+        createdAtUtc:
+          type: string
+          format: date-time
+        responseText:
+          type: string
+        sourceReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceReference'
+        failureReason:
+          type: string
+    GenerationHistoryItem:
+      type: object
+      required:
+        - generationId
+        - sessionId
+        - userId
+        - status
+        - createdAtUtc
+      properties:
+        generationId:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+        userId:
+          type: string
+        status:
+          type: string
+          enum: [received, grounded, completed, failed]
+        createdAtUtc:
+          type: string
+          format: date-time
+        completedAtUtc:
+          type: string
+          format: date-time
+        sourceCount:
+          type: integer
+          minimum: 0
+    GenerationRecord:
+      $ref: ./generation-record.schema.json
+    AuditRecord:
+      $ref: ./audit-record.schema.json
+    SourceReference:
+      type: object
+      required:
+        - sourceReferenceId
+        - generationId
+        - sourceTitle
+        - canonicalUrl
+        - publishedAtUtc
+        - freshnessEligible
+      properties:
+        sourceReferenceId:
+          type: string
+          format: uuid
+        generationId:
+          type: string
+          format: uuid
+        sourceTitle:
+          type: string
+        canonicalUrl:
+          type: string
+          format: uri
+        publishedAtUtc:
+          type: string
+          format: date-time
+        freshnessEligible:
+          type: boolean
+        excerptText:
+          type: string

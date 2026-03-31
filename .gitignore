@@ -1,7 +1,17 @@
 .venv/ 
+.venv-impl/
 __pycache__/ 
 .pytest_cache/ 
 .ruff_cache/ 
 dist/ 
 build/ 
 *.pyc 
+node_modules/
+*.log
+.env*
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.idea/
+.vscode/

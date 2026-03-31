@@ -31,7 +31,17 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Entra authentication is the only allowed user-facing access path, and the plan names the
+  dedicated app registration or records a blocking clarification.
+- The architecture remains an HTML5 frontend plus stateless Python backend over HTTPS, and
+  secrets are sourced only from secure runtime configuration.
+- Azure OpenAI orchestration is documentation-backed, Azure AI Search retrieval stays
+  allowlisted and source-linked, and the six-month freshness rule is enforced.
+- Generation identity and audit records preserve the shared contract, and existing tables
+  in aigovernadvworksdb remain unchanged.
+- Acceptance coverage includes sign-in, grounded generation, history persistence, search by
+  user ID, session ID, and generation ID, audit traceability, and ARM JSON deployment plus
+  any manual VM/certificate steps.
 
 ## Project Structure
 

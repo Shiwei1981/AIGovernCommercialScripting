@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "type": "string" },
+    "vmName": { "type": "string" },
+    "apiBaseUrl": { "type": "string" },
+    "entraClientId": { "type": "string" },
+    "entraTenantId": { "type": "string" },
+    "openAiEndpoint": { "type": "string" },
+    "openAiDeployment": { "type": "string" },
+    "searchEndpoint": { "type": "string" },
+    "searchIndexName": { "type": "string" },
+    "sqlConnectionStringSecretRef": { "type": "string" }
+  },
+  "resources": [],
+  "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[parameters('vmName')]"
+    }
+  }
+}
