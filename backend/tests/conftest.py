@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,9 +39,6 @@ def _claims_token() -> str:
 
 def auth_headers() -> dict[str, str]:
     return {'Authorization': f'Bearer {_claims_token()}'}
-
-
-import pytest
 
 
 @pytest.fixture
