@@ -31,22 +31,7 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Entra authentication is the only allowed user-facing access path, and the plan names the
-  dedicated app registration or records a blocking clarification.
-- The architecture remains VM-hosted HTML5 frontend plus stateless Python backend over
-  HTTPS, and runtime configuration is injected from Azure Web App App Settings.
-- Azure OpenAI orchestration uses the direct SDK with direct REST fallback, Azure AI
-  Search retrieval stays allowlisted and source-linked, and the six-month freshness rule
-  is enforced.
-- Generation identity and audit records preserve the shared contract, and existing tables
-  in aigovernadvworksdb remain unchanged.
-- Normative constraints come only from active repository artifacts and approved decisions;
-  deleted implementation paths are not treated as governing requirements.
-- Uncertain decisions use a safe default and are tagged "待 clarify 确认" with an owner and
-  follow-up date in the plan.
-- Acceptance coverage includes sign-in, grounded generation, history persistence, search by
-  user ID, session ID, and generation ID, audit traceability, Docker -> ACR -> Azure Web
-  App delivery flow, and any manual domain/certificate/consent exceptions.
+[Gates determined based on constitution file]
 
 ## Project Structure
 
