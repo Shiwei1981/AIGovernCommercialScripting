@@ -32,19 +32,24 @@ Define the governing rules for the CommercialScripting child project, which owns
 - Existing database tables are immutable.
 - The generation identity model and audit record schema are authoritative shared contracts.
 - News retrieval must remain allowlisted, source-linked, and limited to the last six months.
+- Core business flows must be implemented as real runtime code; placeholder, hardcoded, or mock-only logic cannot be treated as complete delivery.
 
 ## Security, Identity, and Deployment Principles
 
 - CommercialScripting owns its own Entra app registration.
 - The backend remains stateless unless an amendment explicitly approves otherwise.
-- Deployment planning must target native ARM JSON and document any manual certificate or VM binding steps.
-- Runtime endpoints must align to the demo domain and VM baseline without embedding credentials.
+- Deployment planning must package code as Docker images, publish to ACR, and deploy to Azure Web App.
+- Frontend and backend deployment outputs must be combined into one Docker image/container.
+- Runtime configuration must be injected through Azure Web App App Settings without embedding credentials.
+- Runtime endpoints must align to the configured Azure Web App domain baseline.
 
 ## Testing and Change Control
 
 - Every change to app requirements, contracts, or deployment assumptions must update the child spec, plan, checklist, and tasks before implementation proceeds.
 - Acceptance tests must cover sign-in, grounded generation, history persistence, search, and audit traceability.
+- A simplest-path local development-machine test method must be maintained to validate core workflows without Docker packaging, ACR push, or Azure Web App release.
 - Documentation validation must confirm Azure OpenAI, LangChain compatibility, Azure AI Search retrieval, and Azure SQL access patterns.
+- Requirements traceability from spec -> plan -> tasks -> implementation must be preserved for all governance-critical flows.
 
 ## Naming and Artifact Conventions
 

@@ -8,10 +8,17 @@ agent: speckit.specify
 
 Produce the Step 3 feature specification for CommercialScripting as the governed AI application that emits the generation and audit evidence consumed by the other portfolio projects.
 
+## Spec Output Quality Bar
+
+- The spec must be implementation-agnostic, testable, and traceable.
+- Every requirement should use explicit IDs (for example FR-001 style) and avoid ambiguous wording.
+- Acceptance scenarios must be independently verifiable and mapped to user stories.
+- Include assumptions, constraints, and measurable success criteria.
+
 ## Required Functional Requirements
 
 - HTML5 frontend with Entra ID sign-in.
-- Stateless Python HTTPS backend hosted on `CommercialScriptingVM`.
+- Stateless Python HTTPS backend hosted on Azure Web App (containerized runtime).
 - Azure OpenAI generation path validated against official docs.
 - LangChain usage only if documentation validation confirms compatibility; otherwise document a direct SDK or REST fallback.
 - Azure AI Search retrieval over an allowlisted internet-news corpus with article URLs and a six-month freshness rule.
@@ -37,13 +44,17 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Azure OpenAI preview behavior differs from expected documentation.
 - Search results return incomplete source references.
 - Existing database tables would need modification for a planned feature.
-- VM certificate or hostname trust creates demo-only access constraints.
+- Web App custom domain, TLS binding, or ingress policy creates demo-only access constraints.
 
 ## Non-Functional Requirements
 
 - Entra authentication and least-privilege downstream access are mandatory.
 - Runtime evidence must be real and traceable.
-- Native ARM JSON remains the deployment artifact standard.
+- Placeholder, mock-only, or hardcoded demo logic is not acceptable in delivered implementation requirements.
+- Requirements must state that external integrations (Entra, Azure OpenAI, Azure AI Search, Azure SQL) are implemented as real runtime code paths.
+- Deployment must package the app as Docker images, publish to Azure Container Registry (ACR), and release to Azure Web App.
+- Frontend and backend must be packaged into one Docker image/container for deployment.
+- Application configuration must be injected at runtime via Azure Web App environment variables (App Settings), with no embedded credentials.
 - Python 3.12.3 compatibility and HTML5 delivery patterns are the default.
 
 ## Required Azure and Microsoft Services
@@ -52,7 +63,8 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Azure OpenAI
 - Azure AI Search
 - Azure SQL
-- HTTPS on `CommercialScriptingVM`
+- Azure Container Registry (ACR)
+- Azure Web App for Containers (HTTPS endpoint)
 
 ## Data Sources and Outputs
 
@@ -71,4 +83,10 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Generation success and failure-path tests.
 - History search tests by user, session, and generation ID.
 - Audit-record completeness validation.
+- Define a simplest-path developer-machine test method that runs the system directly without Docker packaging, ACR push, or Azure Web App release.
 - Documentation-validation checkpoints for Azure OpenAI, LangChain, AI Search, and Azure SQL.
+
+## Traceability Expectations
+
+- The generated spec must clearly map user stories -> functional requirements -> acceptance scenarios -> success criteria.
+- Deployment and runtime constraints (single container packaging and Web App App Settings injection) must be captured as requirements, not implementation notes.

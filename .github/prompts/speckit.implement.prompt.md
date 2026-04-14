@@ -13,8 +13,10 @@ Implement the governed CommercialScripting application and its supporting contra
 - HTML5 frontend files.
 - Stateless Python backend files.
 - Azure SQL persistence objects that do not modify existing tables.
-- Native ARM JSON deployment artifacts.
+- Docker build, image tagging, and publish artifacts for ACR, with frontend and backend packaged into one image/container.
+- Azure Web App deployment artifacts and runtime App Settings configuration.
 - Test suites and supporting validation scripts.
+- Local developer-machine direct testing scripts/instructions that validate core workflows without Docker packaging, ACR push, or Azure Web App release.
 
 ## Secrets and Identity
 
@@ -26,3 +28,10 @@ Implement the governed CommercialScripting application and its supporting contra
 - Confirm Azure OpenAI and AI Search APIs against official docs before locking integration code.
 - Confirm SQL auth and connection guidance before finalizing persistence code.
 - Require passing tests for sign-in, grounded generation, history search, and audit traceability before completion.
+- Do not deliver placeholder, stub, or mock-only code for core capabilities; implement real Entra, OpenAI, AI Search, and SQL runtime paths.
+
+## Implementation Guardrails
+
+- Prefer incremental modification on existing code over project regeneration.
+- Avoid broad rewrites when targeted fixes satisfy the requirement.
+- Keep contracts and public API behavior stable unless a spec/task explicitly requires a change.
