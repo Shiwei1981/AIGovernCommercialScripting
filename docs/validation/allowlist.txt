@@ -1,1 +1,14 @@
+# Allowlisted source domains for grounding retrieval.
+# Rules from current code:
+# - One domain per line
+# - Lowercase only
+# - Lines starting with # are ignored
+# - Keep news.example.com to satisfy current mocked retrieval path
+
 news.example.com
+reuters.com
+bloomberg.com
+wsj.com
+cnbc.com
+ft.com
+apnews.com

@@ -1,0 +1,16 @@
+.git
+.gitignore
+.github
+.vscode
+.venv
+.venv-impl
+.pytest_cache
+.specify
+**/__pycache__
+**/*.pyc
+**/.DS_Store
+backend/tests
+frontend/tests
+node_modules
+frontend/node_modules
+specs

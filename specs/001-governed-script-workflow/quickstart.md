@@ -32,9 +32,11 @@ The implementation is expected to define and document at least the following run
 - `AZURE_OPENAI_ENDPOINT`: Azure OpenAI resource endpoint.
 - `AZURE_OPENAI_DEPLOYMENT`: Azure OpenAI deployment name used for governed generation.
 - `AZURE_OPENAI_API_VERSION`: API version pinned for the direct SDK or REST fallback.
+- `AZURE_OPENAI_API_KEY`: Azure OpenAI key used for runtime authentication.
 - `AI_SEARCH_ENDPOINT`: Azure AI Search service endpoint.
 - `AI_SEARCH_INDEX_NAME`: News index name used for grounding queries.
 - `AI_SEARCH_ALLOWLIST_PATH`: Runtime-readable path or configuration entry for the approved source allowlist.
+- `AI_SEARCH_API_KEY`: Azure AI Search key used for runtime authentication.
 - `AZURE_SQL_CONNECTIONSTRING`: Entra-capable Azure SQL connection string for `aigovernadvworksdb`.
 - `GOVERNANCE_SQL_SCHEMA`: Dedicated append-only schema name, expected to be `governance_history`.
 - `APP_BASE_URL`: Public HTTPS origin for the VM-hosted application.

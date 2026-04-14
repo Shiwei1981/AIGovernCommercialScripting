@@ -13,12 +13,14 @@ Implement the governed CommercialScripting application and its supporting contra
 - HTML5 frontend files.
 - Stateless Python backend files.
 - Azure SQL persistence objects that do not modify existing tables.
-- Native ARM JSON deployment artifacts.
+- Native ARM JSON deployment artifacts for Azure Web App for Linux container rollout.
+- Single-container packaging assets that host frontend and backend together.
 - Test suites and supporting validation scripts.
 
 ## Secrets and Identity
 
 - Use OS environment variables, managed identity, or equivalent secure runtime configuration.
+- For POC container releases, inject runtime settings via Azure Web App application settings; do not bundle secrets in container images.
 - Register a dedicated Entra app for the frontend and any separate backend resource access path if required by the final auth design.
 
 ## Validation Requirements

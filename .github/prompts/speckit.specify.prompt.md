@@ -11,13 +11,14 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 ## Required Functional Requirements
 
 - HTML5 frontend with Entra ID sign-in.
-- Stateless Python HTTPS backend hosted on `CommercialScriptingVM`.
-- Azure OpenAI generation path validated against official docs.
-- LangChain usage only if documentation validation confirms compatibility; otherwise document a direct SDK or REST fallback.
+- Stateless Python backend and HTML5 frontend deployed together in a single Docker image on Azure Web App for Linux.
+- Azure OpenAI generation path validated against official docs, with direct SDK as the primary integration path.
+- LangChain is optional and can only be used if documentation validation confirms compatibility; otherwise document the direct SDK or REST path.
 - Azure AI Search retrieval over an allowlisted internet-news corpus with article URLs and a six-month freshness rule.
 - Generation history persistence in Azure SQL database `aigovernadvworksdb`.
 - Search and retrieval by user ID, session ID, and generation ID.
 - Audit event creation for user and generation actions.
+- Runtime configuration must come from Azure Web App application settings (environment variables), not image-bundled secrets.
 
 ## Prioritized User Stories
 
@@ -37,7 +38,8 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Azure OpenAI preview behavior differs from expected documentation.
 - Search results return incomplete source references.
 - Existing database tables would need modification for a planned feature.
-- VM certificate or hostname trust creates demo-only access constraints.
+- Azure Web App app settings are missing, malformed, or inconsistent across deployment slots.
+- Azure Web App default domain callback mismatch causes Entra sign-in failure.
 
 ## Non-Functional Requirements
 
@@ -45,6 +47,7 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Runtime evidence must be real and traceable.
 - Native ARM JSON remains the deployment artifact standard.
 - Python 3.12.3 compatibility and HTML5 delivery patterns are the default.
+- POC release path uses Azure Web App default domain and platform-managed TLS certificate.
 
 ## Required Azure and Microsoft Services
 
@@ -52,7 +55,7 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Azure OpenAI
 - Azure AI Search
 - Azure SQL
-- HTTPS on `CommercialScriptingVM`
+- Azure Web App for Linux (single-container host)
 
 ## Data Sources and Outputs
 
@@ -71,4 +74,4 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Generation success and failure-path tests.
 - History search tests by user, session, and generation ID.
 - Audit-record completeness validation.
-- Documentation-validation checkpoints for Azure OpenAI, LangChain, AI Search, and Azure SQL.
+- Documentation-validation checkpoints for Azure OpenAI SDK/REST, optional LangChain compatibility, AI Search, Entra, and Azure SQL.

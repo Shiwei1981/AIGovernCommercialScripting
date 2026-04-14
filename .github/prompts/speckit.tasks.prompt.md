@@ -15,5 +15,6 @@ Generate dependency-ordered Step 3 tasks for `AIGovenDemoCommercialScripting`.
 - Azure AI Search corpus and retrieval tasks.
 - Azure SQL schema, persistence, and query tasks using only new objects when needed.
 - Test tasks for sign-in, generation, search, audit, and error handling.
-- Native ARM JSON deployment and VM binding tasks.
+- Native ARM JSON deployment and Azure Web App for Linux container rollout tasks.
+- Azure Web App application-settings configuration tasks for runtime environment variables and secrets.
 - Repo bootstrap and GitHub preparation tasks.

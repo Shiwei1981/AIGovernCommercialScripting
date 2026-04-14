@@ -24,9 +24,9 @@ Create an implementation-ready plan for the CommercialScripting child project th
 
 ## Deployment Model
 
-- Target `CommercialScriptingVM`.
+- Target Azure Web App for Linux (single-container).
 - Use native ARM JSON planning for deployable artifacts.
-- Document certificate install, DNS binding, or consent steps as explicit manual exceptions.
+- Plan for Azure Web App default domain and platform-managed TLS certificate in POC releases.
 
 ## Testing Strategy
 
@@ -37,6 +37,8 @@ Create an implementation-ready plan for the CommercialScripting child project th
 
 ## Planning Requirements
 
-- Define environment variables for tenant, client, endpoint, deployment, API version, AI Search, SQL, and certificate paths.
+- Define environment variables for tenant, client, endpoint, deployment, API version, AI Search, SQL, container port, and app callback URLs.
+- Ensure secrets and runtime configuration are sourced from Azure Web App application settings.
+- Define container image build, tag, push, and rollout expectations for Azure Web App for Linux.
 - Define repo bootstrap and push expectations for `AIGovenDemoCommercialScripting`.
 - Preserve database immutability and real-evidence rules.

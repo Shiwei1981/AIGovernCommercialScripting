@@ -18,10 +18,12 @@ class Settings(BaseSettings):
     azure_openai_endpoint: str = Field(..., alias='AZURE_OPENAI_ENDPOINT')
     azure_openai_deployment: str = Field(..., alias='AZURE_OPENAI_DEPLOYMENT')
     azure_openai_api_version: str = Field(..., alias='AZURE_OPENAI_API_VERSION')
+    azure_openai_api_key: str = Field('', alias='AZURE_OPENAI_API_KEY')
 
     ai_search_endpoint: str = Field(..., alias='AI_SEARCH_ENDPOINT')
     ai_search_index_name: str = Field(..., alias='AI_SEARCH_INDEX_NAME')
     ai_search_allowlist_path: str = Field(..., alias='AI_SEARCH_ALLOWLIST_PATH')
+    ai_search_api_key: str = Field('', alias='AI_SEARCH_API_KEY')
 
     azure_sql_connectionstring: str = Field(..., alias='AZURE_SQL_CONNECTIONSTRING')
     governance_sql_schema: str = Field('governance_history', alias='GOVERNANCE_SQL_SCHEMA')

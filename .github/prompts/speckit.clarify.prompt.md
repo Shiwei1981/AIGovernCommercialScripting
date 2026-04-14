@@ -8,15 +8,16 @@ agent: speckit.clarify
 
 - Which Azure AI Search indexing and refresh mechanism will guarantee six-month freshness and source URLs for the allowlisted corpus?
 - Does LangChain remain the approved orchestration layer after documentation validation, or should the project switch to direct Azure OpenAI SDK or REST usage?
-- What exact Entra sign-in flow and redirect URI pattern best fit the VM-hosted HTML5 app?
+- What exact Entra sign-in flow and redirect URI pattern best fit Azure Web App default domain hosting?
 - Which new SQL objects are allowed for history and audit persistence without touching existing tables?
+- Which runtime configuration values must come from Azure Web App application settings for single-container operation?
 
 ## Assumptions If Unanswered
 
 - Azure AI Search is retained with an explicit fallback to a smaller manually refreshed allowlist if automation is insufficient.
 - LangChain stays provisional until validated.
 - The app uses a single dedicated Entra app registration.
-- VM-bound certificate trust steps will be documented as manual deployment exceptions.
+- POC releases use Azure Web App default domain and platform-managed TLS certificate.
 
 ## Blockers vs Non-Blockers
 
@@ -29,5 +30,6 @@ agent: speckit.clarify
 
 - Azure OpenAI preview API compatibility.
 - Azure AI Search indexing, retrieval, and freshness guarantees.
-- Entra ID auth flow for VM-hosted HTML5 apps.
+- Entra ID auth flow for Azure Web App default domain callbacks.
 - Azure SQL secure connection guidance.
+- Azure Web App Linux container runtime and application-settings injection behavior.

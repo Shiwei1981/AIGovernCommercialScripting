@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from src.api.middleware.request_context import RequestContextMiddleware
 from src.api.routes import audit_trace, generation_details, generation_history, generations
@@ -26,3 +29,9 @@ app.include_router(audit_trace.router, prefix=settings.api_prefix)
 @app.get('/healthz')
 def healthz() -> dict[str, str]:
     return {'status': 'ok'}
+
+
+frontend_dist_dir = Path(__file__).resolve().parents[2] / 'frontend_dist'
+if frontend_dist_dir.exists():
+    # Mount frontend static build only when dist assets are present.
+    app.mount('/', StaticFiles(directory=str(frontend_dist_dir), html=True), name='frontend')
