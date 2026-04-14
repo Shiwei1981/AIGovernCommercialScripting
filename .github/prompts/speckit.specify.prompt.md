@@ -18,9 +18,9 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 ## Required Functional Requirements
 
 - HTML5 frontend with Entra ID sign-in.
-- Stateless Python HTTPS backend hosted on Azure Web App (containerized runtime).
-- Azure OpenAI generation path validated against official docs.
-- LangChain usage only if documentation validation confirms compatibility; otherwise document a direct SDK or REST fallback.
+- VM-hosted HTML5 frontend and stateless Python HTTPS backend delivered through the approved container pipeline.
+- Azure OpenAI generation path validated against official docs using direct SDK plus direct REST fallback.
+- LangChain is not adopted.
 - Azure AI Search retrieval over an allowlisted internet-news corpus with article URLs and a six-month freshness rule.
 - Generation history persistence in Azure SQL database `aigovernadvworksdb`.
 - Search and retrieval by user ID, session ID, and generation ID.
@@ -55,6 +55,8 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - Deployment must package the app as Docker images, publish to Azure Container Registry (ACR), and release to Azure Web App.
 - Frontend and backend must be packaged into one Docker image/container for deployment.
 - Application configuration must be injected at runtime via Azure Web App environment variables (App Settings), with no embedded credentials.
+- Uncertain decisions must adopt defaults tagged "待 clarify 确认" and tracked to closure.
+- Constraints must not be derived from deleted implementation history.
 - Python 3.12.3 compatibility and HTML5 delivery patterns are the default.
 
 ## Required Azure and Microsoft Services
@@ -84,7 +86,7 @@ Produce the Step 3 feature specification for CommercialScripting as the governed
 - History search tests by user, session, and generation ID.
 - Audit-record completeness validation.
 - Define a simplest-path developer-machine test method that runs the system directly without Docker packaging, ACR push, or Azure Web App release.
-- Documentation-validation checkpoints for Azure OpenAI, LangChain, AI Search, and Azure SQL.
+- Documentation-validation checkpoints for direct Azure OpenAI SDK/REST, AI Search, Entra, and Azure SQL.
 
 ## Traceability Expectations
 

@@ -17,6 +17,9 @@ Convert tasks.md into dependency-ordered GitHub issues for implementation tracki
 	- ACR publish and Azure Web App deploy flow.
 	- Azure Web App App Settings runtime configuration.
 	- Local developer-machine direct test before publish.
+- Include follow-up issue items for each unresolved "待 clarify 确认" decision.
+- Ensure issue constraints are sourced from active artifacts, not deleted implementation history.
+- Ensure generation issues implement direct Azure OpenAI SDK with direct REST fallback and no LangChain.
 - Include a checklist item to confirm no placeholder/mock-only logic remains.
 
 ## Issue Template Expectations

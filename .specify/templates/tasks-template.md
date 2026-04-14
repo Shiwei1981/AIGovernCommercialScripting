@@ -10,6 +10,9 @@ description: "Task list template for feature implementation"
 
 **Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
+**Clarification Defaults**: Any requirement marked "待 clarify 确认" MUST produce explicit
+tasks for owner assignment, decision capture, and artifact updates before closeout.
+
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
@@ -68,6 +71,10 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T007 Create base models/entities that all stories depend on
 - [ ] T008 Configure error handling and logging infrastructure
 - [ ] T009 Setup environment configuration management
+- [ ] T010 Preserve generation identity and audit contracts in shared models or schemas
+- [ ] T011 Document Azure service validation checkpoints and deployment exceptions
+- [ ] T012 Record and track all "待 clarify 确认" defaults with owner and due date
+- [ ] T013 Ensure constraints are sourced from active artifacts, not deleted implementation history
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -249,3 +256,4 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+- Avoid: introducing mandatory requirements justified only by deleted legacy implementations

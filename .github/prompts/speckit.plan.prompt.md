@@ -20,7 +20,7 @@ Create an implementation-ready plan for the CommercialScripting child project th
 
 - HTML5 client plus stateless Python backend.
 - Entra-authenticated user journey.
-- Azure OpenAI generation service with documented orchestration choice.
+- Azure OpenAI generation service using direct SDK with direct REST fallback.
 - Azure AI Search retrieval pipeline over an allowlisted corpus.
 - Azure SQL persistence for history and audit evidence.
 
@@ -53,4 +53,7 @@ Create an implementation-ready plan for the CommercialScripting child project th
 - Explicitly prohibit placeholder or stub implementations in the delivery plan.
 - Require each integration workstream to define real implementation tasks and acceptance criteria, not mock-only behavior.
 - Require an explicit local test runbook for development test machines that validates core workflows before container publishing.
+- Require uncertain decisions to use defaults tagged "待 clarify 确认" with owner and follow-up date.
+- Prohibit deriving normative constraints from deleted implementation history.
+- Treat LangChain as out of scope unless a later governance amendment re-authorizes it.
 - Require traceability from plan sections back to spec requirements and constraints.

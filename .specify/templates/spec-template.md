@@ -89,16 +89,38 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-00X**: Generation integration MUST use direct Azure OpenAI SDK with a documented
+  direct REST fallback, and MUST NOT adopt LangChain unless governance is amended.
+- **FR-00Y**: Constraints MUST be derived from active repository artifacts and approved
+  architecture decisions, not from deleted legacy implementations.
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION / 待 clarify 确认: auth method not specified - email/password, SSO, OAuth?]
+- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION / 待 clarify 确认: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
+
+## Constitution Alignment *(mandatory)*
+
+<!--
+  ACTION REQUIRED: Confirm how this feature satisfies the local constitution.
+  Replace every placeholder with project-specific decisions or explicit blockers.
+-->
+
+- **Authentication Boundary**: [Describe the Entra-only sign-in path, owning app
+  registration, and any required redirect or consent details]
+- **Runtime Boundary**: [Confirm the HTML5 frontend plus stateless Python HTTPS backend and
+  list secure runtime configuration sources including Azure Web App App Settings]
+- **Contracts and Data Boundary**: [Explain how generation identity, audit records, and any
+  SQL objects preserve shared contracts without changing existing tables]
+- **Retrieval Boundary**: [Describe the allowlisted news corpus, source URL handling,
+  six-month freshness enforcement, and direct Azure OpenAI SDK plus REST fallback choice]
+- **Deployment and Evidence Boundary**: [List Docker -> ACR -> Azure Web App artifacts,
+  App Settings injection, manual domain/certificate/consent steps, and required evidence]
 
 ## Success Criteria *(mandatory)*
 
@@ -126,3 +148,4 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- [Default decision for uncertainty, tagged as "待 clarify 确认", with intended follow-up owner/date]

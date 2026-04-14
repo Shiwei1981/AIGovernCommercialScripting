@@ -29,6 +29,9 @@ Implement the governed CommercialScripting application and its supporting contra
 - Confirm SQL auth and connection guidance before finalizing persistence code.
 - Require passing tests for sign-in, grounded generation, history search, and audit traceability before completion.
 - Do not deliver placeholder, stub, or mock-only code for core capabilities; implement real Entra, OpenAI, AI Search, and SQL runtime paths.
+- Use direct Azure OpenAI SDK as mandatory integration path with documented direct REST fallback; do not adopt LangChain.
+- Apply safe defaults for unresolved decisions and tag each as "待 clarify 确认" with owner and due date.
+- Do not enforce constraints derived from deleted implementation history.
 
 ## Implementation Guardrails
 

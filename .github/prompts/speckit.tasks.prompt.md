@@ -31,3 +31,6 @@ Generate dependency-ordered Step 3 tasks for `AIGovenDemoCommercialScripting`.
 - Tasks that define and validate a local developer-machine direct testing method without Docker packaging, ACR push, or Azure Web App release.
 - Repo bootstrap and GitHub preparation tasks.
 - Tasks that remove placeholder, stub, or mock-only logic and replace it with production-real code paths.
+- Tasks that track each "待 clarify 确认" item to closure with explicit owner and artifact updates.
+- Tasks that avoid deriving mandatory constraints from deleted implementation history.
+- Tasks that implement direct Azure OpenAI SDK with direct REST fallback, without LangChain.
