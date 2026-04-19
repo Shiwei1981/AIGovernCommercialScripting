@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Commercial Assistant POC</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="/static/css/main.css" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="app-header__glow" aria-hidden="true"></div>
+      <div class="container app-header__inner">
+        <div class="app-header__content">
+          <div class="app-header__brand">
+            <span class="app-header__logo" aria-hidden="true">AI</span>
+            <div>
+              <div class="section-eyebrow section-eyebrow--inverse">Enterprise workflow</div>
+              <h1 class="app-header__title">AI Commercial Assistant</h1>
+              <div class="app-header__subtitle">
+                Guided 5-step workspace for product targeting, customer insight, trend research
+                and ad copy generation.
+              </div>
+            </div>
+          </div>
+          <div class="app-header__signals" aria-label="Workflow highlights">
+            <span class="signal-chip">5 guided steps</span>
+            <span class="signal-chip">Up to 10 target customers</span>
+            <span class="signal-chip">Analysis capped for readability</span>
+          </div>
+        </div>
+        <div class="app-header__session">
+          <span id="sessionStatusBadge" class="status-pill status-pill--muted" aria-live="polite">
+            <span class="status-pill__dot" aria-hidden="true"></span>
+            <span id="sessionStatusText">Checking session…</span>
+          </span>
+          <button
+            id="loginBtn"
+            class="btn btn-primary btn-sm"
+            type="button"
+            title="Authenticate with your corporate Entra ID account"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+          >
+            Sign in with Entra ID
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container app-main">
+      <div id="errorBox" class="alert alert-danger d-none" role="alert" aria-live="assertive"></div>
+
+      <section class="card session-card mb-4" aria-label="Session status">
+        <div class="card-body session-card__body">
+          <div class="session-card__content">
+            <div>
+              <div class="section-eyebrow">Account</div>
+              <h2 class="h5 mb-1">Authentication &amp; access</h2>
+              <div class="session-card__summary">
+                Your sign-in state controls access to all customer, trend and ad-copy actions
+                below.
+              </div>
+              <div id="sessionInfo" class="text-muted small"></div>
+              <div id="preLoginHint" class="text-muted small mt-2">
+                Please sign in with your corporate Entra ID account. All business actions stay
+                disabled until you authenticate.
+              </div>
+            </div>
+            <div class="session-card__note">
+              <div class="session-card__note-label">Why this matters</div>
+              <div class="session-card__note-text">
+                This workspace relies on protected enterprise data. Authentication keeps the flow
+                gated and makes each downstream action easier to understand.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="businessFlow" class="d-none">
+        <section class="workspace-banner mb-4" aria-label="Workflow overview">
+          <div class="workspace-banner__eyebrow">Workflow guide</div>
+          <h2 class="workspace-banner__title">Run the process from left to right</h2>
+          <p class="workspace-banner__text">
+            Earlier selections are reused downstream. Products feed trend search and ad copy,
+            while selected customers feed analysis and ad copy generation.
+          </p>
+          <div class="workspace-banner__chips">
+            <span class="workspace-chip">1 product selection reused downstream</span>
+            <span class="workspace-chip">Customer results limited to 10</span>
+            <span class="workspace-chip">Reset clears state and reloads products</span>
+          </div>
+        </section>
+
+        <ol class="flow-stepper" aria-label="Workflow steps">
+          <li class="flow-stepper__item"><span class="flow-stepper__index">1</span>Products</li>
+          <li class="flow-stepper__item"><span class="flow-stepper__index">2</span>Target customers</li>
+          <li class="flow-stepper__item"><span class="flow-stepper__index">3</span>Customer analysis</li>
+          <li class="flow-stepper__item"><span class="flow-stepper__index">4</span>Trend search</li>
+          <li class="flow-stepper__item"><span class="flow-stepper__index">5</span>Ad copy</li>
+        </ol>
+
+        <section class="card flow-card mb-4" aria-labelledby="card-products-title">
+          <header class="flow-card__header">
+            <div>
+              <div class="flow-card__headline">
+                <div class="section-eyebrow">Step 1</div>
+                <span id="productsMetric" class="metric-pill metric-pill--muted">Catalog pending</span>
+              </div>
+              <h2 class="flow-card__title" id="card-products-title">Product Bootstrap</h2>
+              <p class="flow-card__subtitle">
+                Load the top product catalog for the session. Pick one product to use later in
+                <em>Trend Search</em> and <em>Ad Copy</em>.
+              </p>
+            </div>
+            <div class="flow-card__actions">
+              <button
+                id="loadProductsBtn"
+                class="btn btn-outline-primary"
+                type="button"
+                title="Reload the product catalog from the backend"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-loading-text="Reloading..."
+              >
+                Reload Products
+              </button>
+            </div>
+          </header>
+          <div class="flow-card__body">
+            <div class="section-support">
+              Choose one product. The current selection is reused automatically in later steps.
+            </div>
+            <ul
+              id="productsList"
+              class="selectable-list"
+              role="listbox"
+              aria-label="Available products"
+              data-empty-text="No products loaded yet. Click Reload Products to fetch the catalog."
+            ></ul>
+            <div id="selectedProductHint" class="hint-line text-muted small" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="card flow-card mb-4" aria-labelledby="card-customers-title">
+          <header class="flow-card__header">
+            <div>
+              <div class="flow-card__headline">
+                <div class="section-eyebrow">Step 2</div>
+                <span id="customersMetric" class="metric-pill metric-pill--muted">Awaiting query</span>
+              </div>
+              <h2 class="flow-card__title" id="card-customers-title">Query Target Customers</h2>
+              <p class="flow-card__subtitle">
+                Describe the customer profile you want to reach. The assistant will rank up to 10
+                matching customers from your CRM.
+              </p>
+            </div>
+          </header>
+          <div class="flow-card__body">
+            <label class="form-label small text-uppercase text-muted" for="customerDescription">
+              Customer description
+            </label>
+            <textarea
+              id="customerDescription"
+              class="form-control"
+              rows="3"
+              placeholder="e.g. Enterprise retail buyers in North America with high lifetime value and frequent reorders."
+              aria-describedby="customerDescriptionHelp"
+            ></textarea>
+            <div id="customerDescriptionHelp" class="form-text">
+              Be specific: industry, region, behavior, value tier. Up to 10 customers will be returned.
+            </div>
+            <div class="flow-card__inline-actions">
+              <button
+                id="queryCustomersBtn"
+                class="btn btn-primary"
+                type="button"
+                title="Generate a customer ranking based on your description"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-loading-text="Querying..."
+              >
+                Query Target Customers
+              </button>
+            </div>
+            <div class="section-support section-support--tight">
+              The result list is selectable. Pick one matched customer to unlock the analysis step.
+            </div>
+            <ul
+              id="customersList"
+              class="selectable-list mt-3"
+              role="listbox"
+              aria-label="Matched customers"
+              data-empty-text="Run a query to see up to 10 ranked customers here."
+            ></ul>
+            <div id="selectedCustomerHint" class="hint-line text-muted small" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="card flow-card mb-4" aria-labelledby="card-analysis-title">
+          <header class="flow-card__header">
+            <div>
+              <div class="flow-card__headline">
+                <div class="section-eyebrow">Step 3</div>
+                <span id="analysisMetric" class="metric-pill metric-pill--muted">Awaiting selection</span>
+              </div>
+              <h2 class="flow-card__title" id="card-analysis-title">Customer Analysis</h2>
+              <p class="flow-card__subtitle">
+                Generate a sales possibility narrative for the selected customer (limited to ~500 words).
+              </p>
+            </div>
+            <div class="flow-card__actions">
+              <button
+                id="analyzeCustomerBtn"
+                class="btn btn-primary"
+                type="button"
+                title="Run AI analysis for the selected customer"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-loading-text="Analyzing..."
+              >
+                Run Analysis
+              </button>
+            </div>
+          </header>
+          <div class="flow-card__body">
+            <div class="section-support">
+              Result includes order context plus a concise AI assessment for presentation and follow-up.
+            </div>
+            <pre id="customerAnalysis" class="output-pane" aria-live="polite" data-empty-text="Select a customer above, then click Run Analysis to see a concise sales possibility report."></pre>
+          </div>
+        </section>
+
+        <section class="card flow-card mb-4" aria-labelledby="card-trend-title">
+          <header class="flow-card__header">
+            <div>
+              <div class="flow-card__headline">
+                <div class="section-eyebrow">Step 4</div>
+                <span id="trendMetric" class="metric-pill metric-pill--muted">Select product</span>
+              </div>
+              <h2 class="flow-card__title" id="card-trend-title">Product Trend Search</h2>
+              <p class="flow-card__subtitle">
+                Pull recent news and synthesize trend evidence for the selected product. Use the
+                summary in the next step.
+              </p>
+            </div>
+            <div class="flow-card__actions">
+              <button
+                id="trendSearchBtn"
+                class="btn btn-primary"
+                type="button"
+                title="Search news and build a trend summary for the selected product"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-loading-text="Searching..."
+              >
+                Search Trend
+              </button>
+            </div>
+          </header>
+          <div class="flow-card__body">
+            <div class="section-support">
+              The search keyword used is shown below for transparency. Search results open in a new
+              window, and the trend summary is generated directly from the returned result metadata.
+            </div>
+            <h3 class="output-subtitle">Search keyword used</h3>
+            <div
+              id="trendSearchQuery"
+              class="query-display"
+              aria-live="polite"
+              data-empty-text="After Search Trend runs, the exact search keyword used will appear here."
+            ></div>
+            <h3 class="output-subtitle">News evidence</h3>
+            <ul
+              id="newsList"
+              class="news-list"
+              aria-label="News evidence"
+              data-empty-text="No news yet. The trend search results will be listed here."
+            ></ul>
+            <h3 class="output-subtitle mt-3">Trend summary</h3>
+            <pre id="trendSummary" class="output-pane" aria-live="polite" data-empty-text="Select a product above, then click Search Trend. The condensed trend summary will appear here."></pre>
+          </div>
+        </section>
+
+        <section class="card flow-card mb-4" aria-labelledby="card-adcopy-title">
+          <header class="flow-card__header">
+            <div>
+              <div class="flow-card__headline">
+                <div class="section-eyebrow">Step 5</div>
+                <span id="copyMetric" class="metric-pill metric-pill--muted">Awaiting inputs</span>
+              </div>
+              <h2 class="flow-card__title" id="card-adcopy-title">Generate Ad Copy</h2>
+              <p class="flow-card__subtitle">
+                Combine the customer description, selected customer, selected product and trend
+                summary into a ready-to-send ad copy.
+              </p>
+            </div>
+            <div class="flow-card__actions">
+              <button
+                id="adCopyBtn"
+                class="btn btn-primary"
+                type="button"
+                title="Generate ad copy from the previous steps"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-loading-text="Generating..."
+              >
+                Generate Ad Copy
+              </button>
+            </div>
+          </header>
+          <div class="flow-card__body">
+            <div class="section-support">
+              This draft combines all upstream inputs into a ready-to-review outbound message.
+            </div>
+            <pre id="adCopyText" class="output-pane" aria-live="polite" data-empty-text="Complete steps 2–4 first. The generated ad copy will appear here."></pre>
+          </div>
+        </section>
+
+        <div class="flow-footer">
+          <div class="flow-footer__hint text-muted small">
+            Reset clears the customer description, selections and AI outputs, then reloads products.
+          </div>
+          <button
+            id="resetBtn"
+            class="btn btn-outline-secondary"
+            type="button"
+            title="Clear all flow state and reload products"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            data-loading-text="Resetting..."
+          >
+            Reset Flow
+          </button>
+        </div>
+      </div>
+    </main>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      defer
+    ></script>
+    <script src="/static/js/main.js" defer></script>
+  </body>
+</html>
