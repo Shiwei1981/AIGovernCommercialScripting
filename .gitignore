@@ -5,3 +5,22 @@ __pycache__/
 dist/ 
 build/ 
 *.pyc 
+*.log
+.env
+.env.*
+!.env.local.example
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.idea/
+.vscode/
+
+# Non-program/project management artifacts
+.github/
+.specify/
+docs/
+logs/
+specs/
+overall_execution_report.md
+*.pid
