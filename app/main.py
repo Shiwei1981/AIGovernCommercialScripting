@@ -25,7 +25,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 def create_app() -> FastAPI:
     settings = load_settings()
-    app = FastAPI(title="AI Commercial Assistant POC", version="0.1.0")
+    app = FastAPI(title="AI Commercial Assistant POC", version="1.0.0")
     sql_client = None if settings.is_test else SqlClient(settings)
     app.state.container = AppState(
         settings=settings,
