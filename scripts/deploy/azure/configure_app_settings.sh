@@ -1,15 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-RESOURCE_GROUP="${RESOURCE_GROUP:?RESOURCE_GROUP is required}"
-WEBAPP_NAME="${WEBAPP_NAME:?WEBAPP_NAME is required}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/common.sh"
+cd "$ROOT_DIR"
+
+load_env_file
+validate_runtime_env
+validate_deploy_env
+assert_prod_safe_flags
+az_login_with_service_principal
+
+az webapp config set \
+  --resource-group "$DEPLOY_RESOURCE_GROUP" \
+  --name "$DEPLOY_WEBAPP_NAME" \
+  --startup-file "$DEPLOY_APP_STARTUP_COMMAND" \
+  --always-on true \
+  --http20-enabled true \
+  --only-show-errors >/dev/null
 
 az webapp config appsettings set \
-  --resource-group "$RESOURCE_GROUP" \
-  --name "$WEBAPP_NAME" \
+  --resource-group "$DEPLOY_RESOURCE_GROUP" \
+  --name "$DEPLOY_WEBAPP_NAME" \
   --settings \
-    APP_ENV=prod \
-    WEB_APP_PORT=8000 \
+    APP_ENV="$DEPLOY_APP_ENV" \
+    WEB_APP_PORT="$WEB_APP_PORT" \
+    WEBSITES_PORT="$WEB_APP_PORT" \
     AZURE_TENANT_ID="$AZURE_TENANT_ID" \
     AZURE_CLIENT_ID="$AZURE_CLIENT_ID" \
     AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" \
@@ -22,5 +39,12 @@ az webapp config appsettings set \
     OPENAI_API_VERSION="$OPENAI_API_VERSION" \
     OPENAI_DEPLOYMENT="$OPENAI_DEPLOYMENT" \
     GOOGLE_NEWS_RSS_BASE_URL="$GOOGLE_NEWS_RSS_BASE_URL" \
-    SQL_MAX_ROWS=100 \
-    MOCK_AUTH_ENABLED=false
+    SQL_MAX_ROWS="$DEPLOY_SQL_MAX_ROWS" \
+    MOCK_AUTH_ENABLED="$DEPLOY_MOCK_AUTH_ENABLED" \
+    WEBSITE_DNS_SERVER=168.63.129.16 \
+    SCM_DO_BUILD_DURING_DEPLOYMENT=false \
+    ENABLE_ORYX_BUILD=false \
+    PYTHONUNBUFFERED=1 \
+  --only-show-errors >/dev/null
+
+echo "Applied production app settings to Azure Web App: $DEPLOY_WEBAPP_NAME"

@@ -24,6 +24,8 @@ BEGIN
         ALTER TABLE dbo.AIGenerationLog ADD LogId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID();
     IF COL_LENGTH('dbo.AIGenerationLog', 'StepName') IS NULL
         ALTER TABLE dbo.AIGenerationLog ADD StepName NVARCHAR(100) NOT NULL DEFAULT N'';
+    IF COL_LENGTH('dbo.AIGenerationLog', 'ModelName') IS NULL
+        ALTER TABLE dbo.AIGenerationLog ADD ModelName NVARCHAR(200) NOT NULL DEFAULT N'';
     IF COL_LENGTH('dbo.AIGenerationLog', 'ExecutionStatus') IS NULL
         ALTER TABLE dbo.AIGenerationLog ADD ExecutionStatus NVARCHAR(20) NOT NULL DEFAULT N'success';
     IF COL_LENGTH('dbo.AIGenerationLog', 'ExecutionError') IS NULL
