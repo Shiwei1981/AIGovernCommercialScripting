@@ -26,6 +26,13 @@ def _set_test_env() -> None:
             "GOOGLE_NEWS_RSS_BASE_URL": "https://news.google.com/rss/search",
             "SQL_MAX_ROWS": "100",
             "MOCK_AUTH_ENABLED": "true",
+            "DB_READ_GOVERNANCE_ENABLED": "true",
+            "QUERYVISIBILITY_API_URL": "https://purview.example.test/query",
+            "QUERYVISIBILITY_OPENAPI_URL": "https://purview.example.test/query/openapi.json",
+            "QUERYVISIBILITY_OPENAPI_PATH": "/query",
+            "MASK_API_URL": "https://purview.example.test/mask",
+            "MASK_OPENAPI_URL": "https://purview.example.test/mask/openapi.json",
+            "MASK_OPENAPI_PATH": "/mask",
         }
     )
 
@@ -35,7 +42,13 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     _set_test_env()
     from app.main import create_app
 
-    monkeypatch.setattr("app.services.nl2sql_service.invoke_model", lambda *_: "SELECT * FROM Customer")
+    monkeypatch.setattr(
+        "app.services.nl2sql_service.invoke_model",
+        lambda *_: (
+            "SELECT CustomerID AS customer_id, CompanyName AS customer_name, "
+            "1.0 AS relevance_score FROM Customer"
+        ),
+    )
     monkeypatch.setattr(
         "app.services.customer_analysis_service.invoke_model",
         lambda *_: "Customer has strong growth potential.",

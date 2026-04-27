@@ -27,13 +27,16 @@ localhost	FALSE	/	FALSE	0	session_id	${SESSION_ID}
 EOF
 fi
 
+echo "[2b/7] signed-in UPN"
+curl -sS -b "$COOKIE_JAR" "$BASE_URL/api/session" | grep -q "user_principal_name"
+
 echo "[3/7] bootstrap"
 curl -sS -b "$COOKIE_JAR" "$BASE_URL/api/products/bootstrap" | grep -q "product_id"
 
 echo "[4/7] customer query"
 curl -sS -b "$COOKIE_JAR" -H "Content-Type: application/json" \
   -d '{"customer_description":"high value retailer"}' \
-  "$BASE_URL/api/customers/query" | grep -q "generated_sql"
+  "$BASE_URL/api/customers/query" | grep -q "address_display"
 
 echo "[5/7] customer analysis"
 curl -sS -b "$COOKIE_JAR" -X POST "$BASE_URL/api/customers/1/analysis" | grep -q "analysis_text"

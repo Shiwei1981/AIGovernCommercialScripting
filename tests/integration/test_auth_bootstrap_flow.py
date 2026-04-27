@@ -5,14 +5,18 @@ from fastapi.testclient import TestClient
 
 
 def test_unauthenticated_blocking(client: TestClient):
-    resp = client.get("/api/products/bootstrap")
+    resp = client.get("/api/products")
     assert resp.status_code == 401
 
 
 def test_post_login_default_behavior(auth_client: TestClient):
-    products = auth_client.get("/api/products/bootstrap")
+    products = auth_client.get("/api/products")
     assert products.status_code == 200
-    assert len(products.json()) == 10
+    body = products.json()
+    assert body["page"] == 1
+    assert body["page_size"] == 4
+    assert len(body["items"]) == 4
+    assert body["total_count"] == 10
 
 
 def test_mock_auth_rejected_when_not_test(monkeypatch: pytest.MonkeyPatch):

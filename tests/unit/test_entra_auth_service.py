@@ -28,6 +28,13 @@ def _make_settings(authority_url: str) -> Settings:
         google_news_rss_base_url="https://news.google.com/rss/search",
         sql_max_rows=100,
         mock_auth_enabled=False,
+        db_read_governance_enabled=True,
+        queryvisibility_api_url="https://purview.example.test/query",
+        queryvisibility_openapi_url="https://purview.example.test/query/openapi.json",
+        queryvisibility_openapi_path="/query",
+        mask_api_url="https://purview.example.test/mask",
+        mask_openapi_url="https://purview.example.test/mask/openapi.json",
+        mask_openapi_path="/mask",
     )
 
 
@@ -61,6 +68,14 @@ def test_login_redirect_url_normalizes_authority(authority_url: str):
     assert query["response_mode"] == ["query"]
     assert query["scope"] == ["openid profile email"]
     assert query["state"][0]
+
+
+def test_login_redirect_url_can_force_account_selection():
+    service = EntraAuthService(_make_settings("https://login.microsoftonline.com/tenant-test/v2.0"), {})
+    url = service.login_redirect_url(prompt="select_account")
+    query = parse_qs(urlparse(url).query)
+
+    assert query["prompt"] == ["select_account"]
 
 
 @pytest.mark.parametrize(
@@ -102,3 +117,4 @@ def test_process_callback_uses_normalized_token_endpoint(
     assert captured["url"] == "https://login.microsoftonline.com/tenant-test/oauth2/v2.0/token"
     assert user["tenant_id"] == "tenant-test"
     assert user["user_id"] == "oid-123"
+    assert user["user_principal_name"] == "tester@example.com"

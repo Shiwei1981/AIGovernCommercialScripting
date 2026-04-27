@@ -10,6 +10,6 @@ def test_ad_copy_generation_and_reset(auth_client):
         },
     )
     assert resp.status_code == 200
-    assert len(resp.json()["ad_copy_text"].split()) <= 500
+    assert len(resp.json()["ad_copy_text"].split()) <= 200
     reset = auth_client.post("/api/reset")
     assert reset.status_code == 200

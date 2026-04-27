@@ -6,7 +6,7 @@ def test_customer_analysis_word_limit(auth_client, monkeypatch):
     resp = auth_client.post("/api/customers/1/analysis")
     assert resp.status_code == 200
     analysis = resp.json()["analysis_text"]
-    assert len(analysis.split()) <= 500
+    assert len(analysis.split()) <= 200
 
 
 def test_customer_analysis_cjk_length_limit(auth_client, monkeypatch):
@@ -17,4 +17,4 @@ def test_customer_analysis_cjk_length_limit(auth_client, monkeypatch):
     resp = auth_client.post("/api/customers/1/analysis")
     assert resp.status_code == 200
     analysis = resp.json()["analysis_text"]
-    assert len(analysis) <= 500
+    assert len(analysis) <= 200

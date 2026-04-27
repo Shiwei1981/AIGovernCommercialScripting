@@ -8,8 +8,9 @@ from app.data.repositories.mock_data import CUSTOMERS, ORDERS
 from app.data.sql_client import SqlClient
 from app.errors import AppError
 
-DEFAULT_CUSTOMER_QUERY_LIMIT = 10
-HARD_MAX_CUSTOMER_QUERY_LIMIT = 10
+DEFAULT_CUSTOMER_QUERY_LIMIT = 4
+HARD_MAX_CUSTOMER_QUERY_LIMIT = 4
+CUSTOMER_ORDER_LINE_ITEM_LIMIT = 4
 
 
 class CustomerRepository:
@@ -17,18 +18,23 @@ class CustomerRepository:
         self._sql_client = sql_client
         self._settings = settings
 
-    def query_customers(self, generated_sql: str, max_results: int = DEFAULT_CUSTOMER_QUERY_LIMIT) -> list[dict]:
+    def query_customers(
+        self,
+        generated_sql: str,
+        max_results: int = DEFAULT_CUSTOMER_QUERY_LIMIT,
+        user_principal_name: str | None = None,
+    ) -> list[dict]:
         limit = _normalize_limit(max_results)
         if self._sql_client is None:
             return sorted(CUSTOMERS, key=lambda row: row["relevance_score"], reverse=True)[:limit]
         sql_body = generated_sql.strip().rstrip(";")
         sql = _inject_top_limit(sql_body, min(self._settings.sql_max_rows, limit))
-        rows = self._sql_client.query(sql)
+        rows = self._sql_client.query(sql, user_principal_name=user_principal_name)
         normalized = _normalize_customer_rows(rows)[:limit]
-        self._attach_company_names(normalized)
+        self._attach_company_names(normalized, user_principal_name=user_principal_name)
         return normalized
 
-    def get_order_history(self, customer_id: int) -> dict:
+    def get_order_history(self, customer_id: int, user_principal_name: str | None = None) -> dict:
         if self._sql_client is None:
             orders = ORDERS.get(customer_id, [])
             if not orders:
@@ -54,11 +60,13 @@ class CustomerRepository:
             "SELECT SalesOrderID AS order_id, OrderDate AS order_date, TotalDue AS total_due "
             "FROM SalesLT.SalesOrderHeader WHERE CustomerID = ? ORDER BY OrderDate DESC",
             (customer_id,),
+            user_principal_name=user_principal_name,
         )
         if not rows:
             customer_rows = self._sql_client.query(
                 "SELECT TOP 1 CustomerID AS customer_id FROM SalesLT.Customer WHERE CustomerID = ?",
                 (customer_id,),
+                user_principal_name=user_principal_name,
             )
             if not customer_rows:
                 raise AppError("Customer not found", status_code=404)
@@ -78,7 +86,50 @@ class CustomerRepository:
             "orders": rows,
         }
 
-    def get_customer_profile(self, customer_id: int) -> dict:
+    def get_customer_order_line_items(
+        self,
+        customer_id: int,
+        user_principal_name: str | None = None,
+    ) -> list[dict[str, Any]]:
+        if self._sql_client is None:
+            rows: list[dict[str, Any]] = []
+            for order in ORDERS.get(customer_id, []):
+                rows.append(
+                    {
+                        "order_qty": 1,
+                        "unit_price": float(order["total_due"]),
+                        "unit_price_discount": 0.0,
+                        "order_date": order["order_date"],
+                        "sub_total": float(order["total_due"]),
+                        "product_name": "Demo Product",
+                    }
+                )
+            if rows:
+                return rows[:CUSTOMER_ORDER_LINE_ITEM_LIMIT]
+            customer_exists = any(item.get("customer_id") == customer_id for item in CUSTOMERS)
+            if not customer_exists:
+                raise AppError("Customer not found", status_code=404)
+            return []
+        return self._sql_client.query(
+            f"""
+            SELECT TOP {CUSTOMER_ORDER_LINE_ITEM_LIMIT}
+                sod.OrderQty AS order_qty,
+                sod.UnitPrice AS unit_price,
+                sod.UnitPriceDiscount AS unit_price_discount,
+                soh.OrderDate AS order_date,
+                soh.SubTotal AS sub_total,
+                p.Name AS product_name
+            FROM SalesLT.SalesOrderHeader soh
+            JOIN SalesLT.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
+            JOIN SalesLT.Product p ON sod.ProductID = p.ProductID
+            WHERE soh.CustomerID = ?
+            ORDER BY soh.OrderDate DESC, p.Name
+            """,
+            (customer_id,),
+            user_principal_name=user_principal_name,
+        )
+
+    def get_customer_profile(self, customer_id: int, user_principal_name: str | None = None) -> dict:
         if self._sql_client is None:
             for c in CUSTOMERS:
                 if c["customer_id"] == customer_id:
@@ -89,12 +140,17 @@ class CustomerRepository:
             "COALESCE(FirstName + ' ' + LastName, CompanyName) AS customer_name "
             "FROM SalesLT.Customer WHERE CustomerID = ?",
             (customer_id,),
+            user_principal_name=user_principal_name,
         )
         if not rows:
             raise AppError("Customer not found", status_code=404)
         return rows[0]
 
-    def _attach_company_names(self, customers: list[dict[str, Any]]) -> None:
+    def _attach_company_names(
+        self,
+        customers: list[dict[str, Any]],
+        user_principal_name: str | None = None,
+    ) -> None:
         if self._sql_client is None or not customers:
             return
         missing_ids = sorted(
@@ -111,6 +167,7 @@ class CustomerRepository:
             "SELECT CustomerID AS customer_id, CompanyName AS company_name "
             f"FROM SalesLT.Customer WHERE CustomerID IN ({placeholders})",
             tuple(missing_ids),
+            user_principal_name=user_principal_name,
         )
         company_by_id: dict[int, str] = {}
         for row in rows:
@@ -128,7 +185,12 @@ class CustomerRepository:
 
 def _inject_top_limit(sql_body: str, limit: int) -> str:
     if re.match(r"(?is)^\s*select\s+(?:distinct\s+)?top\b", sql_body):
-        return sql_body
+        return re.sub(
+            r"(?is)^(\s*select\s+(?:distinct\s+)?top\s*)(?:\(\s*)?\d+(?:\s*\))?",
+            rf"\g<1>{limit}",
+            sql_body,
+            count=1,
+        )
     if re.match(r"(?is)^\s*select\s+distinct\s+", sql_body):
         return re.sub(
             r"(?is)^(\s*select\s+distinct\s+)",
@@ -148,7 +210,8 @@ def _normalize_limit(limit: int) -> int:
 
 
 def _normalize_customer_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    normalized: list[dict[str, Any]] = []
+    normalized_by_id: dict[int, dict[str, Any]] = {}
+    order: list[int] = []
     total_rows = max(len(rows), 1)
     for idx, row in enumerate(rows):
         row_by_key = {_canonical_key(key): value for key, value in row.items()}
@@ -207,24 +270,74 @@ def _normalize_customer_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
             ),
             fallback=0.0,
         )
-        normalized.append(
-            {
+        address = _address_from_row(row_by_key)
+        if customer_id not in normalized_by_id:
+            normalized_by_id[customer_id] = {
                 "customer_id": customer_id,
                 "customer_name": customer_name,
                 "company_name": company_name,
                 "location": location,
+                "addresses": [],
+                "address_display": None,
                 "relevance_score": relevance_score,
                 "match_reason": match_reason,
                 "order_count": order_count if order_count is not None else 0,
                 "lifetime_value": lifetime_value,
             }
-        )
+            order.append(customer_id)
+        existing = normalized_by_id[customer_id]
+        if address and address not in existing["addresses"]:
+            existing["addresses"].append(address)
+        existing["address_display"] = _join_address_display(existing["addresses"]) or existing.get("location")
+    normalized = [normalized_by_id[customer_id] for customer_id in order]
     if rows and not normalized:
         raise AppError(
             "Customer query returned incompatible columns. Please retry with a clearer description.",
             status_code=400,
         )
     return normalized
+
+
+def _address_from_row(row_by_key: dict[str, Any]) -> dict[str, str | None] | None:
+    address = {
+        "address_line1": _string_or_none(_pick_first(row_by_key, "address_line1", "addressline1")),
+        "address_line2": _string_or_none(_pick_first(row_by_key, "address_line2", "addressline2")),
+        "city": _string_or_none(_pick_first(row_by_key, "city")),
+        "state_province": _string_or_none(
+            _pick_first(row_by_key, "state_province", "stateprovince", "state")
+        ),
+        "country_region": _string_or_none(
+            _pick_first(row_by_key, "country_region", "countryregion", "country")
+        ),
+        "postal_code": _string_or_none(_pick_first(row_by_key, "postal_code", "postalcode", "zip")),
+    }
+    formatted = _format_address(address)
+    if not formatted:
+        return None
+    return {**address, "formatted_address": formatted}
+
+
+def _format_address(address: dict[str, str | None]) -> str:
+    street = " ".join(
+        part
+        for part in [address.get("address_line1"), address.get("address_line2")]
+        if part
+    )
+    city_state_postal = " ".join(
+        part
+        for part in [
+            ", ".join(part for part in [address.get("city"), address.get("state_province")] if part),
+            address.get("postal_code"),
+        ]
+        if part
+    )
+    parts = [part for part in [street, city_state_postal, address.get("country_region")] if part]
+    return ", ".join(parts)
+
+
+def _join_address_display(addresses: list[dict[str, str | None]]) -> str | None:
+    formatted = [str(item["formatted_address"]) for item in addresses if item.get("formatted_address")]
+    return "; ".join(formatted) if formatted else None
 
 
 def _canonical_key(name: str) -> str:

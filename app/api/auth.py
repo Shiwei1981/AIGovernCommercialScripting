@@ -10,8 +10,11 @@ router = APIRouter(tags=["auth"])
 
 
 @router.get("/auth/login", status_code=302)
-def login(auth_service: EntraAuthService = Depends(get_auth_service)):
-    return RedirectResponse(url=auth_service.login_redirect_url(), status_code=302)
+def login(
+    prompt: str | None = Query(default=None),
+    auth_service: EntraAuthService = Depends(get_auth_service),
+):
+    return RedirectResponse(url=auth_service.login_redirect_url(prompt=prompt), status_code=302)
 
 
 @router.get("/auth/callback", status_code=302)

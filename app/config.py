@@ -22,6 +22,13 @@ class Settings:
     google_news_rss_base_url: str
     sql_max_rows: int
     mock_auth_enabled: bool
+    db_read_governance_enabled: bool
+    queryvisibility_api_url: str
+    queryvisibility_openapi_url: str
+    queryvisibility_openapi_path: str
+    mask_api_url: str
+    mask_openapi_url: str
+    mask_openapi_path: str
 
     @property
     def is_test(self) -> bool:
@@ -67,6 +74,13 @@ def load_settings() -> Settings:
         google_news_rss_base_url=_required("GOOGLE_NEWS_RSS_BASE_URL"),
         sql_max_rows=int(os.getenv("SQL_MAX_ROWS", "100")),
         mock_auth_enabled=_as_bool("MOCK_AUTH_ENABLED", False),
+        db_read_governance_enabled=_as_bool("DB_READ_GOVERNANCE_ENABLED", True),
+        queryvisibility_api_url=_required("QUERYVISIBILITY_API_URL"),
+        queryvisibility_openapi_url=_required("QUERYVISIBILITY_OPENAPI_URL"),
+        queryvisibility_openapi_path=_required("QUERYVISIBILITY_OPENAPI_PATH"),
+        mask_api_url=_required("MASK_API_URL"),
+        mask_openapi_url=_required("MASK_OPENAPI_URL"),
+        mask_openapi_path=_required("MASK_OPENAPI_PATH"),
     )
     if settings.mock_auth_enabled and not settings.is_test:
         raise RuntimeError("MOCK_AUTH_ENABLED can only be true when APP_ENV=test")

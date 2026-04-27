@@ -11,6 +11,7 @@ from app.config import Settings
 from app.errors import AppError
 from app.services.ai_client import invoke_model
 from app.services.ai_logging_service import AILoggingService
+from app.services.text_truncation import truncate_text_by_token_count
 
 logger = logging.getLogger("ai-commercial-assistant.news-trend")
 _QUERY_LABEL_RE = re.compile(r"^(?:google\s+news\s+query|search\s+query|query)\s*:\s*", re.IGNORECASE)
@@ -190,14 +191,9 @@ def _build_citations(items: list[dict]) -> list[dict[str, str]]:
     return [{"title": x["title"], "url": x.get("publisher_url") or x["rss_link"]} for x in items]
 
 
-def _truncate_summary_text(text: str, max_words: int = 500) -> str:
+def _truncate_summary_text(text: str, max_words: int = 200) -> str:
     trimmed = _normalize_space(text)
-    if not trimmed:
-        return trimmed
-    words = trimmed.split()
-    if len(words) <= max_words:
-        return trimmed
-    return " ".join(words[:max_words]).strip()
+    return truncate_text_by_token_count(trimmed, max_words)
 
 
 def _build_rss_evidence_item(entry: dict) -> dict:
@@ -241,7 +237,7 @@ def _build_trend_prompt(product: dict, search_query: str, items: list[dict]) -> 
         "You are preparing a product trend brief for a business user.\n"
         "Use only the search-result metadata below (title, source, date, snippet, URL). "
         "Do not invent facts beyond the provided results.\n"
-        "Write a concise plain-language summary in <=220 words. "
+        "Write a concise plain-language summary in <=200 words. "
         "Focus on business-relevant demand signals, launches, innovation, competition, adoption, "
         "or market movement related to the selected product.\n"
         "If evidence looks weak, generic, or mixed, say that plainly in the summary.\n"
@@ -304,7 +300,7 @@ class NewsTrendService:
             raise AppError("RSS dependency failure. Please retry or reset.", 502)
         return parsed
 
-    def search_trends(self, product: dict, user_identity: str) -> dict:
+    def prepare_trend_summary_prompt(self, product: dict, user_identity: str) -> dict:
         attempted_queries = _dedupe_terms(
             [
                 self._generate_search_query(product, user_identity),
@@ -344,18 +340,36 @@ class NewsTrendService:
         if not news_items:
             fetch_errors.append(f"No RSS results returned for query: {search_query}")
         valid_ratio = len(valid_items) / max(len(news_items), 1)
-        citations = _build_citations(valid_items)
+        prompt = _build_trend_prompt(product, search_query, valid_items) if valid_items else ""
+        return {
+            "search_query": search_query,
+            "news_items": news_items,
+            "generated_prompt": prompt,
+            "valid_ratio": valid_ratio,
+            "fetch_errors": fetch_errors,
+        }
 
+    def execute_trend_summary(
+        self,
+        *,
+        search_query: str,
+        news_items: list[dict],
+        prompt: str,
+        valid_ratio: float,
+        fetch_errors: list[str],
+        user_identity: str,
+    ) -> dict:
+        valid_items = [item for item in news_items if item["is_valid_evidence"]]
+        citations = _build_citations(valid_items)
         if not valid_items:
             summary_text = "未检索到足够可用于总结的搜索结果，请尝试重新搜索或更换产品。"
             logger.warning(
                 "Trend search returned no usable RSS metadata: product=%s query=%s total_items=%s",
-                product.get("product_id"),
+                "unknown",
                 search_query,
                 len(news_items),
             )
         else:
-            prompt = _build_trend_prompt(product, search_query, valid_items)
             summary_text = self._ai_logging_service.call_with_logging(
                 step_name="trend_summary",
                 model_name=self._settings.openai_deployment,
@@ -368,6 +382,7 @@ class NewsTrendService:
         return {
             "search_query": search_query,
             "news_items": news_items,
+            "generated_prompt": prompt,
             "summary": {
                 "summary_text": summary_text,
                 "citations": citations,
@@ -375,3 +390,14 @@ class NewsTrendService:
                 "fetch_errors": fetch_errors,
             },
         }
+
+    def search_trends(self, product: dict, user_identity: str) -> dict:
+        preview = self.prepare_trend_summary_prompt(product, user_identity)
+        return self.execute_trend_summary(
+            search_query=preview["search_query"],
+            news_items=preview["news_items"],
+            prompt=preview["generated_prompt"],
+            valid_ratio=preview["valid_ratio"],
+            fetch_errors=preview["fetch_errors"],
+            user_identity=user_identity,
+        )

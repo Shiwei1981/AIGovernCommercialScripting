@@ -37,27 +37,30 @@ class EntraAuthService:
     def _oauth_endpoint(self, endpoint: str) -> str:
         return f"{self._authority_base_url()}/oauth2/v2.0/{endpoint}"
 
-    def login_redirect_url(self) -> str:
+    def login_redirect_url(self, *, prompt: str | None = None) -> str:
         state = str(uuid4())
-        query = urlencode(
-            {
-                "client_id": self._settings.azure_client_id,
-                "response_type": "code",
-                "redirect_uri": self._settings.oidc_callback_url,
-                "response_mode": "query",
-                "scope": "openid profile email",
-                "state": state,
-            }
-        )
+        query_params = {
+            "client_id": self._settings.azure_client_id,
+            "response_type": "code",
+            "redirect_uri": self._settings.oidc_callback_url,
+            "response_mode": "query",
+            "scope": "openid profile email",
+            "state": state,
+        }
+        if prompt == "select_account":
+            query_params["prompt"] = "select_account"
+        query = urlencode(query_params)
         return f"{self._oauth_endpoint('authorize')}?{query}"
 
     def process_callback(self, code: str | None, mock_user: str | None = None) -> dict:
         if self._settings.mock_auth_enabled and self._settings.is_test and mock_user:
+            upn = f"{mock_user}@example.test"
             return {
                 "user_id": mock_user,
                 "tenant_id": self._settings.azure_tenant_id,
                 "display_name": mock_user,
-                "email": f"{mock_user}@example.test",
+                "email": upn,
+                "user_principal_name": upn,
             }
         if mock_user and (not self._settings.mock_auth_enabled or not self._settings.is_test):
             raise AppError("Mock auth is disabled outside automated tests.", 401)
@@ -80,11 +83,13 @@ class EntraAuthService:
         tid = claims.get("tid", "")
         if tid != self._settings.azure_tenant_id:
             raise AppError("Tenant mismatch. Access denied.", 401)
+        upn = claims.get("preferred_username") or claims.get("upn") or claims.get("email")
         return {
             "user_id": claims.get("oid", claims.get("sub", "")),
             "tenant_id": tid,
             "display_name": claims.get("name"),
-            "email": claims.get("preferred_username"),
+            "email": upn,
+            "user_principal_name": upn,
         }
 
     def create_session(self, user: dict) -> str:

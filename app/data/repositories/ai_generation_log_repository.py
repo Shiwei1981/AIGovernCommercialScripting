@@ -23,7 +23,8 @@ class AIGenerationLogRepository:
                 FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_NAME = 'AIGenerationLog'
                 ORDER BY ORDINAL_POSITION
-                """
+                """,
+                apply_governance=False,
             )
         return self._db_columns
 
