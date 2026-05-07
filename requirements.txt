@@ -9,7 +9,9 @@ readability-lxml==0.8.4.1
 beautifulsoup4==4.13.3
 pyodbc==5.2.0
 azure-identity==1.20.0
+azure-monitor-opentelemetry==1.8.7
 openai==1.65.4
+opentelemetry-instrumentation-httpx==0.61b0
 sqlglot==26.10.1
 pytest==8.3.5
 pytest-cov==6.0.0

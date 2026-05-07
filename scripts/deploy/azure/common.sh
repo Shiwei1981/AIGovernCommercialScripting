@@ -111,6 +111,23 @@ load_env_file() {
   DEPLOY_SMOKE_RETRY_INTERVAL_SEC="$(resolve_value PROD_SMOKE_RETRY_INTERVAL_SEC SMOKE_RETRY_INTERVAL_SEC 10)"
   export DEPLOY_SQL_MAX_ROWS
   DEPLOY_SQL_MAX_ROWS="$(resolve_value PROD_SQL_MAX_ROWS SQL_MAX_ROWS "${MAX_AI_SQL_ROWS:-100}")"
+  export DEPLOY_APPLICATIONINSIGHTS_CONNECTION_STRING
+  DEPLOY_APPLICATIONINSIGHTS_CONNECTION_STRING="$(resolve_value PROD_APPLICATIONINSIGHTS_CONNECTION_STRING APPLICATIONINSIGHTS_CONNECTION_STRING "")"
+  export DEPLOY_OTEL_SERVICE_NAME
+  DEPLOY_OTEL_SERVICE_NAME="$(resolve_value PROD_OTEL_SERVICE_NAME OTEL_SERVICE_NAME "")"
+
+  # Resolve PROD_AZURE_CLIENT_ID/SECRET → AZURE_CLIENT_ID/SECRET so that env files
+  # using the PROD_ prefix (e.g. .env.local.PurviewIntegrated) pass validate_runtime_env.
+  local resolved_client_id
+  resolved_client_id="$(resolve_value PROD_AZURE_CLIENT_ID AZURE_CLIENT_ID "")"
+  if [[ -n "$resolved_client_id" ]]; then
+    export AZURE_CLIENT_ID="$resolved_client_id"
+  fi
+  local resolved_client_secret
+  resolved_client_secret="$(resolve_value PROD_AZURE_CLIENT_SECRET AZURE_CLIENT_SECRET "")"
+  if [[ -n "$resolved_client_secret" ]]; then
+    export AZURE_CLIENT_SECRET="$resolved_client_secret"
+  fi
 }
 
 require_commands() {
@@ -182,6 +199,8 @@ validate_deploy_env() {
   [[ -n "${DEPLOY_AZ_DEPLOY_CLIENT_SECRET:-}" ]] || missing+=("AZ_DEPLOY_CLIENT_SECRET")
   [[ -n "${DEPLOY_ACR_LOGIN_SERVER:-}" ]] || missing+=("PROD_ACR_LOGIN_SERVER")
   [[ -n "${DEPLOY_CONTAINER_IMAGE_REPOSITORY:-}" ]] || missing+=("PROD_CONTAINER_IMAGE_REPOSITORY")
+  [[ -n "${DEPLOY_APPLICATIONINSIGHTS_CONNECTION_STRING:-}" ]] || missing+=("PROD_APPLICATIONINSIGHTS_CONNECTION_STRING / APPLICATIONINSIGHTS_CONNECTION_STRING")
+  [[ -n "${DEPLOY_OTEL_SERVICE_NAME:-}" ]] || missing+=("PROD_OTEL_SERVICE_NAME / OTEL_SERVICE_NAME")
   if [[ ${#missing[@]} -gt 0 ]]; then
     printf 'Missing required environment variable(s) in %s:\n' "${ENV_FILE:-$DEFAULT_ENV_FILE}" >&2
     printf '  - %s\n' "${missing[@]}" >&2

@@ -17,6 +17,7 @@ from app.data.repositories.product_repository import ProductRepository
 from app.data.sql_client import SqlClient
 from app.middleware.error_handler import install_error_handlers
 from app.state import AppState
+from app.telemetry import configure_telemetry, instrument_app
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s - %(message)s")
 
@@ -25,6 +26,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 def create_app() -> FastAPI:
     settings = load_settings()
+    configure_telemetry(settings)
     app = FastAPI(title="AI Commercial Assistant POC", version="1.0.0")
     sql_client = None if settings.is_test else SqlClient(settings)
     app.state.container = AppState(
@@ -42,6 +44,7 @@ def create_app() -> FastAPI:
     app.include_router(trend.router)
     app.include_router(ad_copy.router)
     app.include_router(reset.router)
+    instrument_app(app)
 
     @app.get("/", response_class=HTMLResponse)
     def home(request: Request):

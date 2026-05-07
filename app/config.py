@@ -29,6 +29,8 @@ class Settings:
     mask_api_url: str
     mask_openapi_url: str
     mask_openapi_path: str
+    applicationinsights_connection_string: str | None = None
+    otel_service_name: str | None = None
 
     @property
     def is_test(self) -> bool:
@@ -53,6 +55,14 @@ def _as_bool(name: str, default: bool = False) -> bool:
     if raw is None:
         return default
     return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _optional(name: str) -> str | None:
+    value = os.getenv(name)
+    if value is None:
+        return None
+    normalized = value.strip()
+    return normalized or None
 
 
 def load_settings() -> Settings:
@@ -81,6 +91,8 @@ def load_settings() -> Settings:
         mask_api_url=_required("MASK_API_URL"),
         mask_openapi_url=_required("MASK_OPENAPI_URL"),
         mask_openapi_path=_required("MASK_OPENAPI_PATH"),
+        applicationinsights_connection_string=_optional("APPLICATIONINSIGHTS_CONNECTION_STRING"),
+        otel_service_name=_optional("OTEL_SERVICE_NAME"),
     )
     if settings.mock_auth_enabled and not settings.is_test:
         raise RuntimeError("MOCK_AUTH_ENABLED can only be true when APP_ENV=test")
